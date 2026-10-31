@@ -682,3 +682,49 @@ a.tile:hover .tile__more::after { transform: translateX(4px); }
   .marquee__track { animation: none; }
   @view-transition { navigation: none; }
 }
+
+/* 改行の決まり（2026-10-31・tools/kaigyo） */
+/* 日本語は文節（HTML に入れた <wbr>）で折る。入りきらない長い英数字だけ、どこでも折る */
+body { word-break: keep-all; overflow-wrap: anywhere; line-break: strict; }
+h1, h2, h3, h4, h5, h6 { text-wrap: balance; }
+p, li, dt, dd, th, td, figcaption, summary, blockquote { text-wrap: pretty; }
+/* 表は、列の幅を文節より細くしない（「手／続き」のような割れを防ぐ） */
+th, td { overflow-wrap: break-word; }
+/* PC だけ・スマホだけで効く改行（改行エディタで入れたもの） */
+@media (max-width: 1023px) { br.pc-only { display: none; } }
+@media (min-width: 1024px) { br.sp-only { display: none; } }
+
+/* 文字の大きさと折り方 案D（2026-10-31・ボス「整体 CONCEPT の前」を基準に）
+   <html data-moji="d"> のときだけ効く（やめるときは HTML の data-moji を外す）
+   基準：見出し大は1行12〜13字・本文は1行21字前後・行間1.9・字間は palt（スマホ）
+   2026-10-31 夕 ボス「もうワンサイズ下げて、1行の字数を増やして」：見出し大24px・本文15px（1行22〜23字）・注釈13px
+   折り方（PC・スマホ共通）：
+   ・本文は行いっぱいまで使って折る（行の長さがそろって読みやすい）。行の頭に「。、）ー」などが来ないよう厳しい禁則。最後の行が1〜2字だけにならないようにする
+   ・見出し・ボタン・札は文節（<wbr>）で折る。1行目は入るだけ入れる（2行を同じ長さにそろえない） */
+:root {
+  --d-h1: 25px; --d-h2: 24px; --d-h3: 18px; --d-h4: 15px;
+  --d-body: 15px; --d-lead: 15px; --d-note: 13px; --d-btn: 14px;
+  --d-lh-body: 1.9; --d-lh-head: 1.5; --d-ls-head: 0.03em;
+}
+html[data-moji="d"] :is(p, li, dd, td, figcaption, blockquote) {
+  word-break: normal; overflow-wrap: anywhere; line-break: strict; text-wrap: pretty;
+}
+html[data-moji="d"] :is(h1, h2, h3, h4, h5, h6, dt, th, .btn, [class*="btn"], button, [class*="title"], [class*="label"], [class*="badge"], [class*="tag"]) {
+  word-break: keep-all; overflow-wrap: anywhere; line-break: strict; text-wrap: pretty;
+}
+/* 短い文（60字まで・data-wrap="phrase"）と、まん中そろえの文は、文節で折る（1〜2行の文は、言葉の途中で折れると目立つため） */
+html[data-moji="d"] [data-wrap="phrase"] { word-break: keep-all; }
+html[data-moji="d"] :is([class*="center"], [class*="cta"]):not(body) :is(p, li) { word-break: keep-all; text-wrap: pretty; }
+/* 見出しと短い文は「句」（、。！？まで）ごとに包んである（<span class="kc">）。1行に入る句は途中で折らず、句と句のあいだで折る */
+html[data-moji="d"] .kc { display: inline-block; }
+@media (max-width: 767px) {
+  html[data-moji="d"] body { font-feature-settings: "palt"; }
+  html[data-moji="d"] h1 { font-size: var(--d-h1) !important; line-height: var(--d-lh-head) !important; letter-spacing: var(--d-ls-head) !important; }
+  html[data-moji="d"] h2 { font-size: var(--d-h2) !important; line-height: var(--d-lh-head) !important; letter-spacing: var(--d-ls-head) !important; }
+  html[data-moji="d"] h3 { font-size: var(--d-h3) !important; line-height: 1.6 !important; }
+  html[data-moji="d"] :is(h4, dt, th) { font-size: var(--d-h4) !important; }
+  html[data-moji="d"] :is(p, li, dd, td, figcaption, blockquote) { font-size: var(--d-body) !important; line-height: var(--d-lh-body) !important; letter-spacing: normal !important; }
+  html[data-moji="d"] [class*="lead"] { font-size: var(--d-lead) !important; }
+  html[data-moji="d"] :is([class*="note"], small, figcaption, [class*="caption"]) { font-size: var(--d-note) !important; line-height: 1.8 !important; }
+  html[data-moji="d"] :is(.btn, [class*="btn"], button) { font-size: var(--d-btn) !important; }
+}
